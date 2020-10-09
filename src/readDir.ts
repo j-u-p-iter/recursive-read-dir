@@ -9,6 +9,8 @@ interface PathsTree {
 
 type PathsCollection = FilePath[];
 
+const ROOT_PATH = "./";
+
 export const readDir = async (
   rootDirectoryPath: string
 ): Promise<PathsTree | PathsCollection> => {
@@ -23,7 +25,7 @@ export const readDir = async (
 
     if (entryStat.isFile()) {
       const parentDirName =
-        path.dirname(entryPath).replace(rootDirectoryPath, "") || "./";
+        path.dirname(entryPath).replace(rootDirectoryPath, "") || ROOT_PATH;
 
       resultTree[parentDirName] = resultTree[parentDirName] || [];
 
@@ -31,11 +33,7 @@ export const readDir = async (
     } else {
       const newEntries = await fs.promises.readdir(entryPath);
 
-      entries.push(
-        ...newEntries.map(newEntry => {
-          return entry + "/" + newEntry;
-        })
-      );
+      entries.push(...newEntries.map(newEntry => `${entry}/${newEntry}`));
     }
   }
 
