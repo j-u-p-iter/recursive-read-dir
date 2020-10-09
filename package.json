@@ -1,7 +1,8 @@
 {
   "name": "@j.u.p.iter/recursive-read-dir",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "dist/lib/index.js",
+  "typings": "dist/types",
   "description": "Recursively reads directory and returns info as ls -R does",
   "repository": "git@github.com:j-u-p-iter/recursive-read-dir.git",
   "author": "Leontyev Kirill (j.u.p.iter) <pn79122821224@gmail.com> (http://j-u-p-iter.ru/)",
