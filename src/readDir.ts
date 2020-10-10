@@ -3,17 +3,63 @@ import path from "path";
 
 type FilePath = string;
 
-interface PathsTree {
-  [dirPath: string]: FilePath;
-}
+type DirPath = string;
 
 type PathsCollection = FilePath[];
 
+interface PathsTree {
+  [dirPath: string]: PathsCollection;
+}
+
+type DirectoriesCollection = DirPath[];
+
+export enum Format {
+  TREE = "tree",
+  FILES = "files",
+  DIRECTORIES = "directories"
+}
+
+interface Options {
+  format?: Format;
+}
+
 const ROOT_PATH = "./";
 
+const extractFilesFromTree = (tree: PathsTree): FilePath[] => {
+  return Object.values(tree).reduce<FilePath[]>(
+    (filePaths, filePathsForDir) => {
+      return [...filePaths, ...filePathsForDir];
+    },
+    []
+  );
+};
+
+const extractDirectoriesFromTree = (tree: PathsTree): DirPath[] =>
+  Object.keys(tree);
+
+const formatData = (
+  resultTree: PathsTree,
+  format: Format
+): PathsTree | PathsCollection | DirectoriesCollection => {
+  switch (format) {
+    case Format.FILES:
+      return extractFilesFromTree(resultTree);
+
+    case Format.DIRECTORIES:
+      return extractDirectoriesFromTree(resultTree);
+
+    case Format.TREE:
+    default:
+      return resultTree;
+  }
+};
+
 export const readDir = async (
-  rootDirectoryPath: string
-): Promise<PathsTree | PathsCollection> => {
+  rootDirectoryPath: string,
+  options: Options = { format: Format.TREE }
+): Promise<PathsTree | PathsCollection | DirectoriesCollection> => {
+  const { format } = options;
+
   const resultTree = {};
 
   const entries = await fs.promises.readdir(rootDirectoryPath);
@@ -30,12 +76,12 @@ export const readDir = async (
       resultTree[parentDirName] = resultTree[parentDirName] || [];
 
       resultTree[parentDirName] = [...resultTree[parentDirName], entryPath];
-    } else {
+    } else if (entryStat.isDirectory()) {
       const newEntries = await fs.promises.readdir(entryPath);
 
       entries.push(...newEntries.map(newEntry => `${entry}/${newEntry}`));
     }
   }
 
-  return resultTree;
+  return formatData(resultTree, format);
 };
