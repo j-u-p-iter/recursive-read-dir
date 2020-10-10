@@ -2,5 +2,5 @@ const originalConfig = require('@j.u.p.iter/jupiter-scripts/dist/lib/config/jest
 
 module.exports = {
   ...originalConfig,
-  collectCoverage: false,
+  coverageThreshold: null, 
 };
