@@ -1,17 +1,17 @@
 import fs from "fs";
 import path from "path";
 
-type FilePath = string;
+export type FilePath = string;
 
-type DirPath = string;
+export type DirPath = string;
 
-type PathsCollection = FilePath[];
+export type PathsCollection = FilePath[];
 
-interface PathsTree {
+export interface PathsTree {
   [dirPath: string]: PathsCollection;
 }
 
-type DirectoriesCollection = DirPath[];
+export type DirectoriesCollection = DirPath[];
 
 export enum Format {
   TREE = "tree",
