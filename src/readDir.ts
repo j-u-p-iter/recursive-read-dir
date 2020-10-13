@@ -21,6 +21,7 @@ export enum Format {
 
 interface Options {
   format?: Format;
+  dirPatternToExclude?: string;
 }
 
 const ROOT_PATH = "./";
@@ -54,11 +55,21 @@ const formatData = (
   }
 };
 
+const needToBeExcluded = (dirPath, patternToExclude): boolean => {
+  if (!patternToExclude) {
+    return false;
+  }
+
+  const patternRegExp = new RegExp(patternToExclude);
+
+  return patternRegExp.test(dirPath);
+};
+
 export const readDir = async (
   rootDirectoryPath: string,
   options: Options = { format: Format.TREE }
 ): Promise<PathsTree | PathsCollection | DirectoriesCollection> => {
-  const { format } = options;
+  const { format, dirPatternToExclude } = options;
 
   const resultTree = {};
 
@@ -77,9 +88,11 @@ export const readDir = async (
 
       resultTree[parentDirName] = [...resultTree[parentDirName], entryPath];
     } else if (entryStat.isDirectory()) {
-      const newEntries = await fs.promises.readdir(entryPath);
+      if (!needToBeExcluded(entryPath, dirPatternToExclude)) {
+        const newEntries = await fs.promises.readdir(entryPath);
 
-      entries.push(...newEntries.map(newEntry => `${entry}/${newEntry}`));
+        entries.push(...newEntries.map(newEntry => `${entry}/${newEntry}`));
+      }
     }
   }
 

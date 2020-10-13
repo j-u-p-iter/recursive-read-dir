@@ -49,4 +49,45 @@ describe('readDir', () => {
       expect(entries).toEqual([ './', '/folder', '/folder/newFolder' ]);
     });
   });
+
+  describe('with dirPatternToExclude', () => {
+    describe('with TREE format by default', () => {
+      it('works properly', async () => {
+        const entries = await readDir(getAbsolutePath('./fixtures'), { dirPatternToExclude: 'newFolder' });
+        
+        expect(entries).toEqual(
+          {
+            "./": [
+              getAbsolutePath('./fixtures/file.txt')
+            ], 
+
+            "/folder": [
+              getAbsolutePath('./fixtures/folder/anotherFile.txt'),
+              getAbsolutePath('./fixtures/folder/newFile.txt'),
+            ], 
+          }
+        );
+      });
+    })
+
+    describe('with FILES format', () => {
+      it('works properly', async () => {
+        const entries = await readDir(getAbsolutePath('./fixtures'), { format: Format.FILES, dirPatternToExclude: 'newFolder' });
+        
+        expect(entries).toEqual([
+          getAbsolutePath('./fixtures/file.txt'),
+          getAbsolutePath('./fixtures/folder/anotherFile.txt'),
+          getAbsolutePath('./fixtures/folder/newFile.txt'),
+        ]);
+      });
+    });
+
+    describe('with DIRECTORIES format', () => {
+      it('works properly', async () => {
+        const entries = await readDir(getAbsolutePath('./fixtures'), { format: Format.DIRECTORIES, dirPatternToExclude: 'newFolder' });
+        
+        expect(entries).toEqual([ './', '/folder' ]);
+      });
+    });
+  });
 });
