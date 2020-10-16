@@ -18,10 +18,12 @@ describe('readDir', () => {
 
           "/folder": [
             getAbsolutePath('./fixtures/folder/anotherFile.txt'),
+            getAbsolutePath('./fixtures/folder/file.spec.txt'),
             getAbsolutePath('./fixtures/folder/newFile.txt'),
           ], 
 
           "/folder/newFolder": [
+            getAbsolutePath('./fixtures/folder/newFolder/file.spec.txt'),
             getAbsolutePath('./fixtures/folder/newFolder/oneMoreFile.txt'),
           ],
         }
@@ -36,7 +38,9 @@ describe('readDir', () => {
       expect(entries).toEqual([
         getAbsolutePath('./fixtures/file.txt'),
         getAbsolutePath('./fixtures/folder/anotherFile.txt'),
+        getAbsolutePath('./fixtures/folder/file.spec.txt'),
         getAbsolutePath('./fixtures/folder/newFile.txt'),
+        getAbsolutePath('./fixtures/folder/newFolder/file.spec.txt'),
         getAbsolutePath('./fixtures/folder/newFolder/oneMoreFile.txt'),
       ]);
     });
@@ -63,6 +67,7 @@ describe('readDir', () => {
 
             "/folder": [
               getAbsolutePath('./fixtures/folder/anotherFile.txt'),
+              getAbsolutePath('./fixtures/folder/file.spec.txt'),
               getAbsolutePath('./fixtures/folder/newFile.txt'),
             ], 
           }
@@ -77,6 +82,7 @@ describe('readDir', () => {
         expect(entries).toEqual([
           getAbsolutePath('./fixtures/file.txt'),
           getAbsolutePath('./fixtures/folder/anotherFile.txt'),
+          getAbsolutePath('./fixtures/folder/file.spec.txt'),
           getAbsolutePath('./fixtures/folder/newFile.txt'),
         ]);
       });
@@ -87,6 +93,44 @@ describe('readDir', () => {
         const entries = await readDir(getAbsolutePath('./fixtures'), { format: Format.DIRECTORIES, dirPatternToExclude: 'newFolder' });
         
         expect(entries).toEqual([ './', '/folder' ]);
+      });
+    });
+  });
+
+  describe('with filePatternToInclude', () => {
+    describe('with TREE format by default', () => {
+      it('works properly', async () => {
+        const entries = await readDir(getAbsolutePath('./fixtures'), { filePatternToInclude: '.spec.txt' });
+        
+        expect(entries).toEqual(
+          {
+            "/folder": [
+              getAbsolutePath('./fixtures/folder/file.spec.txt'),
+            ], 
+            "/folder/newFolder": [
+              getAbsolutePath('./fixtures/folder/newFolder/file.spec.txt'),
+            ]
+          }
+        );
+      });
+    })
+
+    describe('with FILES format', () => {
+      it('works properly', async () => {
+        const entries = await readDir(getAbsolutePath('./fixtures'), { format: Format.FILES, filePatternToInclude: '.spec.txt' });
+        
+        expect(entries).toEqual([
+          getAbsolutePath('./fixtures/folder/file.spec.txt'),
+          getAbsolutePath('./fixtures/folder/newFolder/file.spec.txt'),
+        ]);
+      });
+    });
+
+    describe.only('with DIRECTORIES format', () => {
+      it('works properly', async () => {
+        const entries = await readDir(getAbsolutePath('./fixtures'), { format: Format.DIRECTORIES, filePatternToInclude: '.spec.txt' });
+        
+        expect(entries).toEqual([ '/folder', '/folder/newFolder' ]);
       });
     });
   });

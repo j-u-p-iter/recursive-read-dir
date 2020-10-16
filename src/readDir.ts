@@ -22,6 +22,7 @@ export enum Format {
 interface Options {
   format?: Format;
   dirPatternToExclude?: string;
+  filePatternToInclude?: string;
 }
 
 const ROOT_PATH = "./";
@@ -65,11 +66,21 @@ const needToBeExcluded = (dirPath, patternToExclude): boolean => {
   return patternRegExp.test(dirPath);
 };
 
+const needToBeIncluded = (filePath, patternToInclude): boolean => {
+  if (!patternToInclude) {
+    return true;
+  }
+
+  const patternRegExp = new RegExp(patternToInclude);
+
+  return patternRegExp.test(filePath);
+};
+
 export const readDir = async (
   rootDirectoryPath: string,
   options: Options = { format: Format.TREE }
 ): Promise<PathsTree | PathsCollection | DirectoriesCollection> => {
-  const { format, dirPatternToExclude } = options;
+  const { format, dirPatternToExclude, filePatternToInclude } = options;
 
   const resultTree = {};
 
@@ -81,12 +92,14 @@ export const readDir = async (
     const entryStat = await fs.promises.lstat(entryPath);
 
     if (entryStat.isFile()) {
-      const parentDirName =
-        path.dirname(entryPath).replace(rootDirectoryPath, "") || ROOT_PATH;
+      if (needToBeIncluded(entryPath, filePatternToInclude)) {
+        const parentDirName =
+          path.dirname(entryPath).replace(rootDirectoryPath, "") || ROOT_PATH;
 
-      resultTree[parentDirName] = resultTree[parentDirName] || [];
+        resultTree[parentDirName] = resultTree[parentDirName] || [];
 
-      resultTree[parentDirName] = [...resultTree[parentDirName], entryPath];
+        resultTree[parentDirName] = [...resultTree[parentDirName], entryPath];
+      }
     } else if (entryStat.isDirectory()) {
       if (!needToBeExcluded(entryPath, dirPatternToExclude)) {
         const newEntries = await fs.promises.readdir(entryPath);
